@@ -45,8 +45,12 @@ void ErrorReporter::print(Report &report)
   std::string lineNum = oss.str();
 
   std::string line = getline(report.span.start.index);
-  std::cerr << "Error " << filename << report.span.start << ": " << report.message << std::endl;
+  std::cerr << filename << report.span.start << ": Error: " << report.message << std::endl;
   std::cerr << lineNum << " | " << line << std::endl;
   std::cerr << std::string(lineNum.length(), ' ') << " | "
             << std::string(report.span.start.col - 1, ' ') << "^" << std::endl;
+  if (report.span.start.line != report.span.end.line)
+  {
+    std::cerr << "(" << report.span.end.line - report.span.start.line + 1 << " lines)" << std::endl;
+  }
 }

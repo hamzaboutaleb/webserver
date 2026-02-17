@@ -10,6 +10,6 @@ Position::Position(unsigned int line, unsigned int col, unsigned int index) : li
 
 std::ostream &operator<<(std::ostream &os, const Position &pos)
 {
-  os << "[" << pos.line << "," << pos.col << "]";
+  os << "[" << pos.line << ":" << pos.col << "]";
   return os;
 }

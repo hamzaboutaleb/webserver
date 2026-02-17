@@ -38,4 +38,6 @@ int main(int argc, char **argv)
     errorReporter.printAll();
     return 1;
   }
+
+  return 0;
 }

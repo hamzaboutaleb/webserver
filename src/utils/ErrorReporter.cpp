@@ -3,7 +3,7 @@
 #include <iomanip>
 #include <sstream>
 
-ErrorReporter::ErrorReporter(const std::string &buffer, std::string &filename) : buffer(buffer), filename(filename)
+ErrorReporter::ErrorReporter(const std::string &buffer, const std::string &filename) : buffer(buffer), filename(filename)
 {
 }
 
@@ -27,7 +27,7 @@ void ErrorReporter::printAll()
   }
 }
 
-static std::string getline(const std::string &buffer, unsigned int index)
+std::string ErrorReporter::getline(unsigned int index)
 {
   unsigned int start = index;
   unsigned int end = index;
@@ -44,7 +44,7 @@ void ErrorReporter::print(Report &report)
   oss << report.span.start.line;
   std::string lineNum = oss.str();
 
-  std::string line = getline(buffer, report.span.start.index);
+  std::string line = getline(report.span.start.index);
   std::cerr << "Error " << filename << report.span.start << ": " << report.message << std::endl;
   std::cerr << lineNum << " | " << line << std::endl;
   std::cerr << std::string(lineNum.length(), ' ') << " | "

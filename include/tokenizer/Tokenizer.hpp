@@ -20,7 +20,7 @@ private:
   std::map<std::string, TokenType> keywords;
 
 public:
-  Tokenizer(const std::string &buffer, ErrorReporter &reproter);
+  Tokenizer(const std::string &buffer, ErrorReporter &reporter);
   std::vector<Token> tokenize();
 
 private:

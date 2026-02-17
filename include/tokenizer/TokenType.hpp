@@ -1,0 +1,25 @@
+#ifndef TOKEN_TYPE_HPP
+#define TOKEN_TYPE_HPP
+
+enum TokenType
+{
+  // SYMBOLS
+  LEFT_BRACE,
+  RIGHT_BRACE,
+  SEMICOLON,
+
+  // KEYWORDS
+  SERVER,
+  LISTEN,
+  ROOT,
+  INDEX,
+
+  // LITERALS
+  IDENTIFIER,
+
+  // SPECIAL
+  END_OF_FILE,
+  UNKNOWN
+};
+
+#endif

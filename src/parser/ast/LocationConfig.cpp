@@ -4,3 +4,13 @@ LocationConfig::LocationConfig(const std::string &path, const std::vector<Direct
     : Node(span), path(path), directives(directives)
 {
 }
+
+const std::string &LocationConfig::getPath() const
+{
+    return path;
+}
+
+const std::vector<Directive> &LocationConfig::getDirectives() const
+{
+    return directives;
+}

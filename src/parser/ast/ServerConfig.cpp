@@ -4,3 +4,13 @@ ServerConfig::ServerConfig(const std::vector<Directive> &directives, const std::
     : Node(span), directives(directives), locations(locations)
 {
 }
+
+const std::vector<Directive> &ServerConfig::getDirectives() const
+{
+    return directives;
+}
+
+const std::vector<LocationConfig> &ServerConfig::getLocations() const
+{
+    return locations;
+}

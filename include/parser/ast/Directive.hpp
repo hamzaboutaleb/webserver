@@ -6,12 +6,16 @@
 
 #include "parser/ast/Node.hpp"
 
-struct Directive : public Node
+class Directive : public Node
 {
+private:
   std::string key;
   std::vector<std::string> values;
 
+public:
   Directive(const std::string &key, const std::vector<std::string> &values, Span span);
+  const std::string &getKey() const;
+  const std::vector<std::string> &getValues() const;
 };
 
 #endif

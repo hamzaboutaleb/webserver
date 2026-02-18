@@ -11,6 +11,7 @@ private:
 
 public:
   Config(const std::vector<ServerConfig> &servers, const Span &span);
+  const std::vector<ServerConfig> &getServers() const;
 };
 
 #endif

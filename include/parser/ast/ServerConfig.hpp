@@ -14,6 +14,8 @@ private:
 
 public:
   ServerConfig(const std::vector<Directive> &directives, const std::vector<LocationConfig> &locations, const Span &span);
+  const std::vector<Directive> &getDirectives() const;
+  const std::vector<LocationConfig> &getLocations() const;
 };
 
 #endif

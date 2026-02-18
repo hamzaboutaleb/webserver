@@ -13,6 +13,8 @@ class LocationConfig : public Node
 
 public:
   LocationConfig(const std::string &path, const std::vector<Directive> &directives, const Span &span);
+  const std::string &getPath() const;
+  const std::vector<Directive> &getDirectives() const;
 };
 
 #endif

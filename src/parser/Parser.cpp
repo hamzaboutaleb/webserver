@@ -41,6 +41,8 @@ ServerConfig Parser::parseServerConfig()
   {
     try
     {
+      if (tokenStream.check(SERVER))
+        tokenStream.throwError("Server block cannot be nested inside another server block");
       if (tokenStream.check(LOCATION))
         locations.push_back(parseLocationConfig());
       else
@@ -49,10 +51,7 @@ ServerConfig Parser::parseServerConfig()
     catch (const ParseError &e)
     {
       if (tokenStream.check(SERVER))
-      {
-        tokenStream.reportError("Unexpected start of server block inside a server block.");
         throw ParseError();
-      }
       tokenStream.synchronize();
     }
   }
@@ -77,10 +76,7 @@ LocationConfig Parser::parseLocationConfig()
     catch (const ParseError &e)
     {
       if (tokenStream.check(SERVER))
-      {
-        tokenStream.reportError("Unexpected start of server block inside a location block.");
-        tokenStream.synchronize();
-      }
+        throw ParseError();
       else if (tokenStream.check(LOCATION))
       {
         tokenStream.reportError("Nested locations are not supported.");
@@ -109,7 +105,8 @@ Directive Parser::parseDirective()
   {
     values.push_back(tokenStream.consumeValue().getValue());
   }
+  if (values.empty())
+    tokenStream.throwError("Directive '" + key + "' must have at least one value.");
   Token end = tokenStream.consume(SEMICOLON, "Expected ';' after directive");
-
   return Directive(key, values, Span(keyToken.getSpan().start, end.getSpan().end));
 }

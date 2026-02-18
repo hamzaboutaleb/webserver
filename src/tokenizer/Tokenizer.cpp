@@ -7,6 +7,14 @@ Tokenizer::Tokenizer(const std::string &buffer, ErrorReporter &reporter) : buffe
   keywords["listen"] = LISTEN;
   keywords["root"] = ROOT;
   keywords["index"] = INDEX;
+  keywords["location"] = LOCATION;
+  keywords["error_page"] = ERROR_PAGE;
+  keywords["allow_methods"] = ALLOW_METHODS;
+  keywords["auto_index"] = AUTO_INDEX;
+  keywords["cgi_pass"] = CGI_PASS;
+  keywords["cgi_extensions"] = CGI_EXTENSIONS;
+  keywords["upload_dir"] = UPLOAD_DIR;
+  keywords["client_max_body_size"] = CLIENT_MAX_BODY_SIZE;
 }
 
 std::vector<Token> Tokenizer::tokenize()

@@ -7,6 +7,7 @@
 
 #include "utils/ErrorReporter.hpp"
 #include "tokenizer/Tokenizer.hpp"
+#include "parser/parser.hpp"
 
 std::string readFile(const std::string &filename)
 {
@@ -38,6 +39,15 @@ int main(int argc, char **argv)
     errorReporter.printAll();
     return 1;
   }
+  Parser parser(tokens, errorReporter);
+  Config config = parser.parse();
+  if (errorReporter.hasErrors())
+  {
+    errorReporter.printAll();
+    return 1;
+  }
+
+  std::cout << "Successfully parsed configuration file!" << std::endl;
 
   return 0;
 }

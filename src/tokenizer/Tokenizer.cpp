@@ -4,6 +4,7 @@
 Tokenizer::Tokenizer(const std::string &buffer, ErrorReporter &reporter) : buffer(buffer), reporter(reporter), cursor(0), line(1), col(1)
 {
   keywords["server"] = SERVER;
+  keywords["server_name"] = SERVER_NAME;
   keywords["listen"] = LISTEN;
   keywords["root"] = ROOT;
   keywords["index"] = INDEX;

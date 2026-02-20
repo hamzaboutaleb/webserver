@@ -11,6 +11,7 @@ enum TokenType
   // KEYWORDS
   SERVER,
   LISTEN,
+  SERVER_NAME,
   ROOT,
   INDEX,
   LOCATION,

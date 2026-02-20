@@ -40,6 +40,11 @@ int main(int argc, char **argv)
     errorReporter.printAll();
     return 1;
   }
+  // for (size_t i = 0; i < tokens.size(); i++)
+  // {
+  //   const Token &token = tokens[i];
+  //   std::cout << "Token: '" << token.getValue() << "' at line " << token.getSpan().start.line << ", column " << token.getSpan().start.col << std::endl;
+  // }
   Parser parser(tokens, errorReporter);
   Config config = parser.parse();
   if (errorReporter.hasErrors())

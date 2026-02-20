@@ -7,6 +7,7 @@ TokenStream::TokenStream(const std::vector<Token> &tokens, ErrorReporter &errorR
     directives.insert(LISTEN);
     directives.insert(ROOT);
     directives.insert(INDEX);
+    directives.insert(SERVER_NAME);
     directives.insert(ERROR_PAGE);
     directives.insert(ALLOW_METHODS);
     directives.insert(AUTO_INDEX);
@@ -107,7 +108,8 @@ Token TokenStream::consumeDirective()
     if (directives.find(type) != directives.end())
         return advance();
 
-    reportError("Expected directive name  but found " + tokenTypeString(type));
+    std::cout << "directive value: " << peek().getValue() << std::endl;
+    reportError("Expected directive name but found " + tokenTypeString(type));
     throw ParseError();
 }
 

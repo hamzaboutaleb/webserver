@@ -13,7 +13,7 @@ TokenStream::TokenStream(const std::vector<Token> &tokens, ErrorReporter &errorR
     directives.insert(AUTO_INDEX);
     directives.insert(CGI_EXTENSION);
     directives.insert(UPLOAD_STORE);
-    directives.insert(CLIENT_MAX_BODY_SIZE);
+    directives.insert(CLIENT_MAX_BODY_SIZE); 
 }
 
 const Token &TokenStream::peek() const

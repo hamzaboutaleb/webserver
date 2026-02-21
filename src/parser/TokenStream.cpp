@@ -9,11 +9,10 @@ TokenStream::TokenStream(const std::vector<Token> &tokens, ErrorReporter &errorR
     directives.insert(INDEX);
     directives.insert(SERVER_NAME);
     directives.insert(ERROR_PAGE);
-    directives.insert(ALLOW_METHODS);
+    directives.insert(METHODS);
     directives.insert(AUTO_INDEX);
-    directives.insert(CGI_PASS);
-    directives.insert(CGI_EXTENSIONS);
-    directives.insert(UPLOAD_DIR);
+    directives.insert(CGI_EXTENSION);
+    directives.insert(UPLOAD_STORE);
     directives.insert(CLIENT_MAX_BODY_SIZE);
 }
 

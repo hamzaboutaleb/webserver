@@ -42,3 +42,55 @@ bool ConfigValidator::isValidServerName(const std::string &name)
   }
   return true;
 }
+
+bool ConfigValidator::isValidSizeValue(const std::string &value)
+{
+  if (value.empty())
+    return false;
+  size_t lastCharIndex = value.size() - 1;
+  char lastChar = std::tolower(value[lastCharIndex]);
+  bool hasUnit = (lastChar == 'k' || lastChar == 'm' || lastChar == 'g');
+  std::string numberPart = hasUnit ? value.substr(0, lastCharIndex) : value;
+  if (numberPart.empty())
+    return false;
+  for (size_t i = 0; i < numberPart.size(); i++)
+  {
+    if (!isdigit(numberPart[i]))
+      return false;
+  }
+  return true;
+}
+
+bool ConfigValidator::isValidIP(const std::string &ip)
+{
+  if (ip == "*" || ip == "0.0.0.0" || ip == "localhost")
+    return true;
+
+  std::vector<std::string> segments;
+  std::stringstream ss(ip);
+  std::string segment;
+  while (std::getline(ss, segment, '.'))
+  {
+    segments.push_back(segment);
+  }
+
+  if (segments.size() != 4)
+    return false;
+
+  for (size_t i = 0; i < 4; i++)
+  {
+    if (segments[i].empty() || segments[i].size() > 3)
+      return false;
+    for (size_t j = 0; j < segments[i].size(); j++)
+    {
+      if (!isdigit(segments[i][j]))
+        return false;
+    }
+    int val;
+    std::stringstream valSS(segments[i]);
+    valSS >> val;
+    if (val < 0 || val > 255)
+      return false;
+  }
+  return true;
+}

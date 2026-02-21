@@ -23,3 +23,8 @@ bool File::isFile(const std::string &path)
     return false;
   return S_ISREG(buffer.st_mode);
 }
+
+bool File::isExecutable(const std::string &path)
+{
+  return (access(path.c_str(), X_OK) == 0);
+}

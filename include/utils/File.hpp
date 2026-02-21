@@ -9,6 +9,7 @@ public:
   static bool exists(const std::string &path);
   static bool isDirectory(const std::string &path);
   static bool isFile(const std::string &path);
+  static bool isExecutable(const std::string &path);
 };
 
 #endif

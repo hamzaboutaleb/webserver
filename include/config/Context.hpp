@@ -1,0 +1,11 @@
+#ifndef CONTEXT_HPP
+#define CONTEXT_HPP
+
+enum Context
+{
+  GLOBAL_CONTEXT,
+  SERVER_CONTEXT,
+  LOCATION_CONTEXT
+};
+
+#endif

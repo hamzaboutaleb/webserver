@@ -10,12 +10,12 @@ Tokenizer::Tokenizer(const std::string &buffer, ErrorReporter &reporter) : buffe
   keywords["index"] = INDEX;
   keywords["location"] = LOCATION;
   keywords["error_page"] = ERROR_PAGE;
-  keywords["allow_methods"] = ALLOW_METHODS;
+  keywords["methods"] = METHODS;
   keywords["auto_index"] = AUTO_INDEX;
-  keywords["cgi_pass"] = CGI_PASS;
-  keywords["cgi_extensions"] = CGI_EXTENSIONS;
-  keywords["upload_dir"] = UPLOAD_DIR;
+  keywords["cgi_extension"] = CGI_EXTENSION;
+  keywords["upload_store"] = UPLOAD_STORE;
   keywords["client_max_body_size"] = CLIENT_MAX_BODY_SIZE;
+  keywords["return"] = RETURN;
 }
 
 std::vector<Token> Tokenizer::tokenize()

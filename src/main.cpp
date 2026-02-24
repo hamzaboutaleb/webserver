@@ -9,6 +9,7 @@
 #include "tokenizer/Tokenizer.hpp"
 #include "parser/parser.hpp"
 #include "config/ConfigValidator.hpp"
+#include "core/EventLoop.hpp"
 
 std::string readFile(const std::string &filename)
 {
@@ -60,6 +61,14 @@ int main(int argc, char **argv)
     return 1;
   }
   std::cout << "Successfully parsed configuration file!" << std::endl;
+  try
+  {
+    EventLoop eventLoop;
+  }
+  catch (const EventLoop::EpollCreationException &e)
+  {
+    std::cerr << "Failed to create epoll instance" << '\n';
+  }
 
   return 0;
 }

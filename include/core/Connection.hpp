@@ -14,6 +14,8 @@ public:
 
   int getFd() const;
   ConnectionType getType() const;
+  static Connection *createListener(int fd);
+  static Connection *createClient(int fd);
 };
 
 #endif

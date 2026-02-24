@@ -8,6 +8,7 @@
 class EventLoop
 {
   int epollFd;
+  epoll_event *events;
   std::map<int, Connection *> connections;
 
 public:

@@ -1,5 +1,7 @@
 #include <sys/epoll.h>
 #include <errno.h>
+#include <unistd.h>
+#include "core/Socket.hpp"
 
 #include "core/EventLoop.hpp"
 #include "core/ConnectionType.hpp"
@@ -12,6 +14,7 @@ EventLoop::EventLoop()
   {
     throw EpollCreationException();
   }
+  events = new epoll_event[1024];
 }
 void EventLoop::addConnection(Connection *connection)
 {
@@ -33,7 +36,6 @@ void EventLoop::addConnection(Connection *connection)
 
 void EventLoop::run()
 {
-  epoll_event *events = new epoll_event[1024];
   while (true)
   {
     int nfds = epoll_wait(epollFd, events, 1024, 100);
@@ -61,7 +63,8 @@ void EventLoop::run()
   }
 }
 
-// EventLoop::~EventLoop()
-// {
-//   close(epollFd);
-// }
+EventLoop::~EventLoop()
+{
+   close(epollFd);
+   delete[] events;
+ }

@@ -12,3 +12,13 @@ ConnectionType Connection::getType() const
 {
   return type;
 }
+
+Connection *Connection::createListener(int fd)
+{
+  return new Connection(fd, LISTENER);
+}
+
+Connection *Connection::createClient(int fd)
+{
+  return new Connection(fd, CLIENT);
+}

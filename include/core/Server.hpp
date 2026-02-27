@@ -27,6 +27,7 @@ public:
   const std::set<std::string> &getHostnames() const;
   const std::string &getRoot() const;
   const std::vector<Location *> &getLocations() const;
+  void print() const;
 };
 
 #endif

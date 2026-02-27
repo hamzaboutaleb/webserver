@@ -4,7 +4,7 @@ build
 *.tmp
 *.swp
 *.conf
-
+.clang-format
 web-serv
 
 TEST_CASES.md

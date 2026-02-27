@@ -4,6 +4,7 @@
 #include "utils/ErrorReporter.hpp"
 #include "config/Context.hpp"
 #include <map>
+#include <set>
 #include <string>
 #include <vector>
 #include <utility>
@@ -14,7 +15,13 @@ private:
   typedef bool (ConfigValidator::*ValidatorFunc)(const Directive &);
   std::map<std::string, ValidatorFunc> directiveValidators;
   ErrorReporter &errorReporter;
+  // Key: (port, server_name) -> Value: Span
   std::map<std::pair<std::string, std::string>, Span> usedServerNameLocationPairs;
+  // State for wildcard-aware validation
+  // port -> list of hostnames found on that port
+  std::map<int, std::map<std::string, Span> > hostnamesOnPort; 
+  // port -> interface that used wildcard
+  std::map<int, Span> portToWildcardSpan;
 
 public:
   ConfigValidator(ErrorReporter &errorReporter);

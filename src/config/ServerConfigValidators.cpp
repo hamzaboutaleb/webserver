@@ -1,5 +1,7 @@
 #include "config/ConfigValidator.hpp"
+#include "utils/NetworkResolver.hpp"
 #include <set>
+#include <sstream>
 
 void ConfigValidator::validateRequiredDirectives(const ServerConfig &serverConfig)
 {
@@ -21,7 +23,7 @@ void ConfigValidator::validateRequiredDirectives(const ServerConfig &serverConfi
 
 void ConfigValidator::validateServerNameUniqueness(const ServerConfig &serverConfig)
 {
-  std::vector<std::string> ports;
+  std::vector<std::string> rawListenValues;
   std::vector<std::string> serverNames;
   Span serverNameSpan = Span();
 
@@ -30,7 +32,7 @@ void ConfigValidator::validateServerNameUniqueness(const ServerConfig &serverCon
   {
     const Directive &directive = directives[i];
     if (directive.getKey() == "listen" && directive.getValues().size() == 1)
-      ports.push_back(directive.getValues()[0]);
+      rawListenValues.push_back(directive.getValues()[0]);
     else if (directive.getKey() == "server_name")
     {
       std::vector<std::string> values = directive.getValues();
@@ -45,31 +47,61 @@ void ConfigValidator::validateServerNameUniqueness(const ServerConfig &serverCon
     serverNameSpan = serverConfig.getSpan();
   }
 
-  for (size_t p = 0; p < ports.size(); p++)
+  for (size_t p = 0; p < rawListenValues.size(); p++)
   {
-    const std::string &port = ports[p];
+    std::pair<std::string, int> interfacePort = NetworkResolver::resolveListen(rawListenValues[p]);
+    std::string interface = interfacePort.first;
+    int port = interfacePort.second;
+    std::string portStr;
+    {
+       std::ostringstream ss;
+       ss << port;
+       portStr = ss.str();
+    }
+
     for (size_t i = 0; i < serverNames.size(); i++)
     {
       const std::string &serverName = serverNames[i];
-      std::pair<std::string, std::string> key = std::make_pair(port, serverName);
-
-      if (usedServerNameLocationPairs.find(key) != usedServerNameLocationPairs.end())
+      
+      // 1. Exact Match Check (Interface:Port + ServerName)
+      std::pair<std::string, std::string> exactKey = std::make_pair(rawListenValues[p], serverName);
+      if (usedServerNameLocationPairs.find(exactKey) != usedServerNameLocationPairs.end())
       {
-        Span previousSpan = usedServerNameLocationPairs[key];
-        if (serverName.empty())
-        {
-          reportError(serverNameSpan, "Duplicate listen port '" + port + "' with default server_name");
-          reportError(previousSpan, "Previous declaration of this listen port with default server_name");
-        }
-        else
-        {
-          reportError(serverNameSpan, "Duplicate server_name '" + serverName + "' with listen port '" + port + "'");
-          reportError(previousSpan, "Previous declaration of this server_name and port combination");
-        }
+        Span previousSpan = usedServerNameLocationPairs[exactKey];
+        reportError(serverNameSpan, "Duplicate server_name '" + serverName + "' with listen '" + rawListenValues[p] + "'");
+        reportError(previousSpan, "Previous declaration of this server_name and listen combination");
       }
       else
       {
-        usedServerNameLocationPairs[key] = serverNameSpan;
+        usedServerNameLocationPairs[exactKey] = serverNameSpan;
+      }
+
+      // 2. Wildcard Conflict Detection (0.0.0.0:Port + ServerName)
+      if (interface == "0.0.0.0")
+      {
+         portToWildcardSpan[port] = serverConfig.getSpan();
+
+         if (hostnamesOnPort[port].count(serverName))
+         {
+            Span prevSpan = hostnamesOnPort[port][serverName];
+            reportError(serverNameSpan, "Conflict: server_name '" + serverName + "' on port " + portStr + " is already used, and 0.0.0.0 listener is present");
+            reportError(prevSpan, "Previous declaration on the same port");
+         }
+      }
+      else if (portToWildcardSpan.count(port))
+      {
+          if (hostnamesOnPort[port].count(serverName))
+          {
+             Span prevSpan = hostnamesOnPort[port][serverName];
+             reportError(serverNameSpan, "Conflict: server_name '" + serverName + "' on port " + portStr + " conflicts with 0.0.0.0 listener");
+             reportError(prevSpan, "Previous declaration on the same port");
+          }
+      }
+
+      // Record this hostname for this port
+      if (hostnamesOnPort[port].find(serverName) == hostnamesOnPort[port].end())
+      {
+          hostnamesOnPort[port][serverName] = serverNameSpan;
       }
     }
   }

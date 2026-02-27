@@ -51,6 +51,8 @@ bool ConfigValidator::isDirectivePresent(const std::vector<Directive> &directive
 void ConfigValidator::validate(Config &config)
 {
   usedServerNameLocationPairs.clear();
+  hostnamesOnPort.clear();
+  portToWildcardSpan.clear();
   for (size_t i = 0; i < config.getServers().size(); i++)
   {
     validateServerConfig(config.getServers()[i]);

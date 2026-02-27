@@ -1,10 +1,16 @@
 #ifndef SOCKET_HPP
 #define SOCKET_HPP
 #include <exception>
+#include <string>
+
+class ServerManager;
 
 class Socket
 {
-  static int createListener(int port);
+public:
+  static int createListener(const std::string &interface, int port);
+  static int acceptConnection(int fd);
+  static void setNonBlocking(int fd);
 
   class SocketCreationException : public std::exception
   {
@@ -38,6 +44,13 @@ class Socket
     }
   };
 
+  class SocketNonBlockingException : public std::exception
+  {
+    const char *what() const throw()
+    {
+      return "Failed to set socket to non-blocking";
+    }
+  };
 };
 
 #endif

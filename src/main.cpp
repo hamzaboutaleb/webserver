@@ -11,6 +11,8 @@
 #include "config/ConfigValidator.hpp"
 #include "core/EventLoop.hpp"
 #include "config/Transformer.hpp"
+#include "core/ServerManager.hpp"
+#include "core/Socket.hpp"
 
 std::string readFile(const std::string &filename)
 {
@@ -70,7 +72,7 @@ int main(int argc, char **argv)
   {
     Server *server = servers[i];
     std::cout << "Server " << i << ":" << std::endl;
-    
+
     std::cout << "  Listen interfaces:" << std::endl;
     const std::vector<std::pair<std::string, int> > &interfaces = server->getListenInterfaces();
     for (size_t j = 0; j < interfaces.size(); j++)
@@ -97,7 +99,7 @@ int main(int argc, char **argv)
         std::cout << "    - Path: " << loc->getPath() << std::endl;
         if (!loc->getRoot().empty())
           std::cout << "      Root: " << loc->getRoot() << std::endl;
-        
+
         const std::map<std::string, std::vector<std::string> > &directives = loc->getDirectives();
         for (std::map<std::string, std::vector<std::string> >::const_iterator it = directives.begin(); it != directives.end(); ++it)
         {
@@ -110,6 +112,18 @@ int main(int argc, char **argv)
     }
     std::cout << std::endl;
   }
-  
+
+  ServerManager manager;
+  try
+  {
+    manager.setup(servers);
+    manager.run();
+  }
+  catch (const std::exception &e)
+  {
+    std::cerr << "Fatal Error: " << e.what() << std::endl;
+    return 1;
+  }
+
   return 0;
 }

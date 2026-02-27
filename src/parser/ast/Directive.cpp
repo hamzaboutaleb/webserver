@@ -5,7 +5,7 @@ Directive::Directive(const std::string &key, const std::vector<std::string> &val
 {
 }
 
-const std::string &Directive::getKey() const
+const std::string Directive::getKey() const
 {
     return key;
 }

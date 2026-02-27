@@ -38,7 +38,7 @@ void EventLoop::run()
 {
   while (true)
   {
-    int nfds = epoll_wait(epollFd, events, 1024, 100);
+    int nfds = epoll_wait(epollFd, events, 1024, 1000);
     if (nfds == -1)
     {
       if (errno == EINTR)
@@ -65,6 +65,6 @@ void EventLoop::run()
 
 EventLoop::~EventLoop()
 {
-   close(epollFd);
-   delete[] events;
- }
+  close(epollFd);
+  delete[] events;
+}

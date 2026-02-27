@@ -156,9 +156,9 @@ bool ConfigValidator::checkClientMaxBodySizeDirective(const Directive &directive
 bool ConfigValidator::checkIndexDirective(const Directive &directive)
 {
   const std::vector<std::string> &values = directive.getValues();
-  if (values.empty())
+  if (values.size() != 1)
   {
-    reportInvalidDirective(directive, "index directive requires at least one value");
+    reportInvalidDirective(directive, "index directive requires exactly one value");
     return false;
   }
   return true;

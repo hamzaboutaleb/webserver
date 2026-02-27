@@ -13,8 +13,9 @@ private:
   std::vector<std::string> values;
 
 public:
+  Directive();
   Directive(const std::string &key, const std::vector<std::string> &values, Span span);
-  const std::string &getKey() const;
+  const std::string getKey() const;
   const std::vector<std::string> &getValues() const;
 };
 

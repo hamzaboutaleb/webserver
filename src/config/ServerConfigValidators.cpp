@@ -21,7 +21,7 @@ void ConfigValidator::validateRequiredDirectives(const ServerConfig &serverConfi
 
 void ConfigValidator::validateServerNameUniqueness(const ServerConfig &serverConfig)
 {
-  std::string port;
+  std::vector<std::string> ports;
   std::vector<std::string> serverNames;
   Span serverNameSpan = Span();
 
@@ -30,10 +30,11 @@ void ConfigValidator::validateServerNameUniqueness(const ServerConfig &serverCon
   {
     const Directive &directive = directives[i];
     if (directive.getKey() == "listen" && directive.getValues().size() == 1)
-      port = directive.getValues()[0];
+      ports.push_back(directive.getValues()[0]);
     else if (directive.getKey() == "server_name")
     {
-      serverNames = directive.getValues();
+      std::vector<std::string> values = directive.getValues();
+      serverNames.insert(serverNames.end(), values.begin(), values.end());
       serverNameSpan = directive.getSpan();
     }
   }
@@ -44,28 +45,32 @@ void ConfigValidator::validateServerNameUniqueness(const ServerConfig &serverCon
     serverNameSpan = serverConfig.getSpan();
   }
 
-  for (size_t i = 0; i < serverNames.size(); i++)
+  for (size_t p = 0; p < ports.size(); p++)
   {
-    const std::string &serverName = serverNames[i];
-    std::pair<std::string, std::string> key = std::make_pair(port, serverName);
-
-    if (usedServerNameLocationPairs.find(key) != usedServerNameLocationPairs.end())
+    const std::string &port = ports[p];
+    for (size_t i = 0; i < serverNames.size(); i++)
     {
-      Span previousSpan = usedServerNameLocationPairs[key];
-      if (serverName.empty())
+      const std::string &serverName = serverNames[i];
+      std::pair<std::string, std::string> key = std::make_pair(port, serverName);
+
+      if (usedServerNameLocationPairs.find(key) != usedServerNameLocationPairs.end())
       {
-        reportError(serverNameSpan, "Duplicate listen port '" + port + "' with default server_name");
-        reportError(previousSpan, "Previous declaration of this listen port with default server_name");
+        Span previousSpan = usedServerNameLocationPairs[key];
+        if (serverName.empty())
+        {
+          reportError(serverNameSpan, "Duplicate listen port '" + port + "' with default server_name");
+          reportError(previousSpan, "Previous declaration of this listen port with default server_name");
+        }
+        else
+        {
+          reportError(serverNameSpan, "Duplicate server_name '" + serverName + "' with listen port '" + port + "'");
+          reportError(previousSpan, "Previous declaration of this server_name and port combination");
+        }
       }
       else
       {
-        reportError(serverNameSpan, "Duplicate server_name '" + serverName + "' with listen port '" + port + "'");
-        reportError(previousSpan, "Previous declaration of this server_name and port combination");
+        usedServerNameLocationPairs[key] = serverNameSpan;
       }
-    }
-    else
-    {
-      usedServerNameLocationPairs[key] = serverNameSpan;
     }
   }
 }
@@ -79,7 +84,10 @@ void ConfigValidator::validateNoDuplicateDirectives(const ServerConfig &serverCo
   {
     const Directive &directive = directives[i];
     const std::string &key = directive.getKey();
-
+    if (key == "listen" || key == "server_name")
+    {
+      continue;
+    }
     if (seen.find(key) != seen.end())
     {
       reportError(directive.getSpan(), "Duplicate directive '" + key + "'");

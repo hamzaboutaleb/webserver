@@ -11,7 +11,7 @@ Tokenizer::Tokenizer(const std::string &buffer, ErrorReporter &reporter) : buffe
   keywords["location"] = LOCATION;
   keywords["error_page"] = ERROR_PAGE;
   keywords["methods"] = METHODS;
-  keywords["auto_index"] = AUTO_INDEX;
+  keywords["autoindex"] = AUTO_INDEX;
   keywords["cgi_extension"] = CGI_EXTENSION;
   keywords["upload_store"] = UPLOAD_STORE;
   keywords["client_max_body_size"] = CLIENT_MAX_BODY_SIZE;

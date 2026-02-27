@@ -3,6 +3,7 @@
 
 #include <exception>
 #include <map>
+#include <sys/epoll.h>
 #include "core/Connection.hpp"
 
 class EventLoop

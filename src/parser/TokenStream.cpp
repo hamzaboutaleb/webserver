@@ -11,6 +11,7 @@ TokenStream::TokenStream(const std::vector<Token> &tokens, ErrorReporter &errorR
     directives.insert(ERROR_PAGE);
     directives.insert(METHODS);
     directives.insert(AUTO_INDEX);
+    directives.insert(RETURN);
     directives.insert(CGI_EXTENSION);
     directives.insert(UPLOAD_STORE);
     directives.insert(CLIENT_MAX_BODY_SIZE); 

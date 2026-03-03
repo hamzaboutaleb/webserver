@@ -6,8 +6,6 @@ bool ConfigValidator::isValidPort(const std::string &portStr)
 {
   if (portStr.empty() || portStr.size() > 5)
     return false;
-  if (portStr.size() > 5)
-    return false;
   for (size_t i = 0; i < portStr.size(); i++)
   {
     if (!isdigit(portStr[i]))

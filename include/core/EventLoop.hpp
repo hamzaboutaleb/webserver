@@ -17,6 +17,7 @@ public:
   ~EventLoop();
 
   void addConnection(Connection *connection);
+  void removeConnection(Connection *connection);
   void run();
 
   class EpollCreationException : public std::exception

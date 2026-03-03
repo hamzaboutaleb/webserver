@@ -18,8 +18,9 @@ public:
   Transformer(Config &config);
   void transform();
   Server *transformServer(const ServerConfig &serverConfig);
-  Location *transformLocation(const LocationConfig &locationConfig);
+  Location *transformLocation(const LocationConfig &locationConfig, Server *server);
   const std::vector<Server *> &getServers() const;
+  std::vector<Server *> releaseServers();
 };
 
 #endif

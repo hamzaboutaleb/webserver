@@ -7,7 +7,7 @@ class Number
 {
 public:
   static bool isDigits(const std::string &str);
-  static int toInt(const std::string &str);
+  static int toInt(const std::string &str, bool *ok = NULL);
 };
 
 #endif

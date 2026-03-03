@@ -7,6 +7,7 @@
 #include "utils/Timer.hpp"
 
 class ServerManager;
+class RequestContext;
 
 class Connection {
   int fd;
@@ -17,6 +18,8 @@ class Connection {
   Server *server;
   bool shouldCleanup;
   ServerManager &serverManager;
+  bool keepAlive;
+  RequestContext *context;
 
   char *buffer;
 
@@ -28,6 +31,7 @@ public:
   int getFd() const;
   int getPort() const;
   ConnectionType getType() const;
+  bool getKeepAlive() const;
 
   void updateActivity();
   bool isTimedOut() const;
@@ -36,6 +40,8 @@ public:
   void writeData();
   ServerManager &getServerManager();
   HttpRequest &getRequest();
+  void processHeaders();
+  bool getShouldCleanup() const;
 
   static Connection *createListener(int fd, ServerManager &serverManager,
                                     int port);
@@ -51,6 +57,9 @@ public:
       return "Error reading data from connection";
     }
   };
+
+private:
+  void resolveConnectionHeaders();
 };
 
 #endif

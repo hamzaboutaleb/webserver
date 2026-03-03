@@ -19,19 +19,27 @@ EventLoop::EventLoop()
 }
 void EventLoop::addConnection(Connection *connection)
 {
+  if (connections.find(connection->getFd()) != connections.end())
+  {
+    throw EventLoop::ConnectionAlreadyExist();
+  }
   struct epoll_event event;
   event.events = EPOLLIN;
   event.data.ptr = (void *)connection;
   if (epoll_ctl(epollFd, EPOLL_CTL_ADD, connection->getFd(), &event) == -1)
   {
-    // Do not delete connection here, let the caller handle it or manage it consistently
     throw EventLoop::EpollAddConnectionException();
   }
-  if (connections.find(connection->getFd()) != connections.end())
-  {
-    throw EventLoop::ConnectionAlreadyExist();
-  }
   connections[connection->getFd()] = connection;
+}
+
+void EventLoop::removeConnection(Connection *connection)
+{
+  int fd = connection->getFd();
+  epoll_ctl(epollFd, EPOLL_CTL_DEL, fd, NULL);
+  connections.erase(fd);
+  close(fd);
+  delete connection;
 }
 
 void EventLoop::run()
@@ -43,7 +51,7 @@ void EventLoop::run()
     {
       if (errno == EINTR)
       {
-        continue; // Interrupted by signal, retry
+        continue;
       }
       throw EventLoop::EpollWaitException();
     }
@@ -76,10 +84,16 @@ void EventLoop::run()
           if (events[i].events & EPOLLIN)
           {
             connection->readData();
+            if (connection->getShouldCleanup())
+            {
+              removeConnection(connection);
+              continue;
+            }
             if (connection->getRequest().getState() == PARSE_SUCCESS)
             {
               connection->getRequest().print();
               // For now, send a response and close
+              events[i].events = EPOLLOUT;
               write(connection->getFd(), "HTTP/1.1 200 OK\r\nContent-Length: 13\r\n\r\nHello world!\n", 52);
             }
           }
@@ -91,18 +105,12 @@ void EventLoop::run()
         catch (const Connection::ConnectionClosedException &e)
         {
           std::cout << "Connection closed by peer on fd " << connection->getFd() << std::endl;
-          epoll_ctl(epollFd, EPOLL_CTL_DEL, connection->getFd(), NULL);
-          connections.erase(connection->getFd());
-          close(connection->getFd());
-          delete connection;
+          removeConnection(connection);
         }
         catch (const std::exception &e)
         {
           std::cerr << "Error handling connection on fd " << connection->getFd() << ": " << e.what() << std::endl;
-          epoll_ctl(epollFd, EPOLL_CTL_DEL, connection->getFd(), NULL);
-          connections.erase(connection->getFd());
-          close(connection->getFd());
-          delete connection;
+          removeConnection(connection);
         }
       }
     }
@@ -114,8 +122,9 @@ void EventLoop::run()
       if (conn->isTimedOut())
       {
         std::cout << "Closing timed out connection on fd " << conn->getFd() << std::endl;
-        epoll_ctl(epollFd, EPOLL_CTL_DEL, conn->getFd(), NULL);
-        close(conn->getFd());
+        int fd = conn->getFd();
+        epoll_ctl(epollFd, EPOLL_CTL_DEL, fd, NULL);
+        close(fd);
         delete conn;
         connections.erase(it++);
       }

@@ -1,5 +1,5 @@
-#ifndef CONNECTION_TYPE_CPP
-#define CONNECTION_TYPE_CPP
+#ifndef CONNECTION_TYPE_HPP
+#define CONNECTION_TYPE_HPP
 
 enum ConnectionType
 {

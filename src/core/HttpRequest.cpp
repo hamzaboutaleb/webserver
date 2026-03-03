@@ -33,7 +33,7 @@ void HttpRequest::parse() {
       return;
   }
 
-  if (state == PARSE_RESOLVE_SERVER)
+  if (state == PARSE_PROCESS_HEADERS)
     return; // resolve outside of this class
 
   if (state == PARSE_BODY) {
@@ -43,8 +43,10 @@ void HttpRequest::parse() {
 void HttpRequest::parseRequestLine() {
   std::size_t pos = buffer.find("\r\n");
   if (pos == std::string::npos) {
-    if (buffer.size() > 8192)
-      throw RequestLineTooLongException();
+    if (buffer.size() > 8192) {
+      state = PARSE_ERROR;
+      return;
+    }
     return;
   }
   std::string requestLine = buffer.substr(0, pos);
@@ -111,7 +113,7 @@ void HttpRequest::parseHeaders() {
     buffer.erase(0, pos + 2);
 
     if (line.empty()) {
-      state = PARSE_RESOLVE_SERVER;
+      state = PARSE_PROCESS_HEADERS;
       return;
     }
 
@@ -127,8 +129,10 @@ void HttpRequest::parseHeaders() {
     headers[name] = value;
   }
 
-  if (buffer.size() > 65536)
-    throw HeadersTooLongException(); // doesnt make sense bug fix it
+  if (buffer.size() > 65536) {
+    state = PARSE_ERROR;
+    return;
+  }
 }
 
 void HttpRequest::parseBody() {

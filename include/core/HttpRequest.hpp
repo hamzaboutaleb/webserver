@@ -1,22 +1,20 @@
 #ifndef HTTP_REQUEST_HPP
 #define HTTP_REQUEST_HPP
 
-#include <string>
 #include <map>
 #include <set>
+#include <string>
 
-enum HttpParseState
-{
+enum HttpParseState {
   PARSE_REQUEST_LINE,
   PARSE_HEADERS,
-  PARSE_RESOLVE_SERVER,
+  PARSE_PROCESS_HEADERS,
   PARSE_BODY,
   PARSE_SUCCESS,
   PARSE_ERROR
 };
 
-class HttpRequest
-{
+class HttpRequest {
 private:
   HttpParseState state;
   std::string buffer;
@@ -49,20 +47,12 @@ public:
   std::map<std::string, std::string> getHeaders() const { return headers; }
   std::string getHeader(const std::string &name) const;
   std::string getBody() const { return body; }
-  class RequestLineTooLongException : public std::exception
-  {
-    const char *what() const throw()
-    {
-      return "Request line too long";
-    }
+  class RequestLineTooLongException : public std::exception {
+    const char *what() const throw() { return "Request line too long"; }
   };
 
-  class HeadersTooLongException : public std::exception
-  {
-    const char *what() const throw()
-    {
-      return "Headers too long";
-    }
+  class HeadersTooLongException : public std::exception {
+    const char *what() const throw() { return "Headers too long"; }
   };
 };
 

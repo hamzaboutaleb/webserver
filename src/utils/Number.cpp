@@ -14,10 +14,13 @@ bool Number::isDigits(const std::string &str)
   return true;
 }
 
-int Number::toInt(const std::string &str)
+int Number::toInt(const std::string &str, bool *ok)
 {
-  int num;
+  int num = 0;
   std::stringstream ss(str);
   ss >> num;
-  return num;
+  bool success = !ss.fail() && ss.eof();
+  if (ok)
+    *ok = success;
+  return success ? num : 0;
 }

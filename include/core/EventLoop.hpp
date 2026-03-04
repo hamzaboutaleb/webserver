@@ -11,6 +11,7 @@ class EventLoop
   int epollFd;
   epoll_event *events;
   std::map<int, Connection *> connections;
+  bool running;
 
 public:
   EventLoop();
@@ -19,6 +20,7 @@ public:
   void addConnection(Connection *connection);
   void removeConnection(Connection *connection);
   void run();
+  void stop();
 
   class EpollCreationException : public std::exception
   {

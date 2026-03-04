@@ -1,9 +1,10 @@
 #include "core/HttpRequest.hpp"
 #include "utils/Number.hpp"
 #include "utils/String.hpp"
+#include "utils/Constants.hpp"
 #include <iostream>
 
-HttpRequest::HttpRequest() : state(PARSE_REQUEST_LINE), buffer("") {
+HttpRequest::HttpRequest() : state(PARSE_REQUEST_LINE), errorCode(0), buffer("") {
   allowedMethods.insert("GET");
   allowedMethods.insert("POST");
   allowedMethods.insert("DELETE");
@@ -43,8 +44,9 @@ void HttpRequest::parse() {
 void HttpRequest::parseRequestLine() {
   std::size_t pos = buffer.find("\r\n");
   if (pos == std::string::npos) {
-    if (buffer.size() > 8192) {
+    if (buffer.size() > Constants::Http::MaxRequestLine) {
       state = PARSE_ERROR;
+      errorCode = 414; // URI Too Long
       return;
     }
     return;
@@ -55,18 +57,21 @@ void HttpRequest::parseRequestLine() {
   std::size_t methodEnd = requestLine.find(' ');
   if (methodEnd == std::string::npos) {
     state = PARSE_ERROR;
+    errorCode = 400; // Bad Request
     return;
   }
   method = requestLine.substr(0, methodEnd);
 
   if (!isMethodAllowed(method)) {
     state = PARSE_ERROR;
+    errorCode = 405; // Method Not Allowed (treating as parse error for simplicity)
     return;
   }
 
   std::size_t uriEnd = requestLine.find(' ', methodEnd + 1);
   if (uriEnd == std::string::npos) {
     state = PARSE_ERROR;
+    errorCode = 400;
     return;
   }
   std::string uri = requestLine.substr(methodEnd + 1, uriEnd - methodEnd - 1);
@@ -103,9 +108,7 @@ void HttpRequest::parseUri(std::string uri) {
     }
   }
 }
-// TODO: after parsing the request line, we should resolve server based on Host
-// header and then resolve the URI based on the server's root and the request
-// URI
+
 void HttpRequest::parseHeaders() {
   std::size_t pos;
   while ((pos = buffer.find("\r\n")) != std::string::npos) {
@@ -120,6 +123,7 @@ void HttpRequest::parseHeaders() {
     std::size_t colonPos = line.find(':');
     if (colonPos == std::string::npos) {
       state = PARSE_ERROR;
+      errorCode = 400;
       return;
     }
 
@@ -129,8 +133,9 @@ void HttpRequest::parseHeaders() {
     headers[name] = value;
   }
 
-  if (buffer.size() > 65536) {
+  if (buffer.size() > Constants::Http::MaxHeaderSize) {
     state = PARSE_ERROR;
+    errorCode = 431; // Request Header Fields Too Large
     return;
   }
 }
@@ -156,11 +161,30 @@ bool HttpRequest::isMethodAllowed(const std::string &method) const {
 
 void HttpRequest::setState(HttpParseState newState) { state = newState; }
 
+int HttpRequest::getErrorCode() const { return errorCode; }
+
+void HttpRequest::setErrorCode(int code) { 
+  errorCode = code;
+  state = PARSE_ERROR;
+}
+
 std::string HttpRequest::getHeader(const std::string &name) const {
   std::map<std::string, std::string>::const_iterator it = headers.find(name);
   if (it != headers.end())
     return it->second;
   return "";
+}
+
+void HttpRequest::clear() {
+  state = PARSE_REQUEST_LINE;
+  errorCode = 0;
+  buffer.clear();
+  method.clear();
+  path.clear();
+  version.clear();
+  queryParams.clear();
+  headers.clear();
+  body.clear();
 }
 
 void HttpRequest::print() const {

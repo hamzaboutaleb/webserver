@@ -27,6 +27,7 @@ public:
   Server *resolveServerForRequest(const HttpRequest &request, int port);
   void setup(const std::vector<Server *> &servers);
   void run();
+  void stop();
 
   class ServerSetupException : public std::runtime_error
   {

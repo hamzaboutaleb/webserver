@@ -3,6 +3,7 @@
 
 #include "core/ConnectionType.hpp"
 #include "core/HttpRequest.hpp"
+#include "core/HttpResponse.hpp"
 #include "core/Server.hpp"
 #include "utils/Timer.hpp"
 
@@ -15,6 +16,7 @@ class Connection {
   ConnectionType type;
   Timer timer;
   HttpRequest request;
+  HttpResponse response;
   Server *server;
   bool shouldCleanup;
   ServerManager &serverManager;
@@ -40,6 +42,7 @@ public:
   void writeData();
   ServerManager &getServerManager();
   HttpRequest &getRequest();
+  HttpResponse &getResponse();
   void processHeaders();
   bool getShouldCleanup() const;
 
@@ -60,6 +63,7 @@ public:
 
 private:
   void resolveConnectionHeaders();
+  void prepareResponse();
 };
 
 #endif

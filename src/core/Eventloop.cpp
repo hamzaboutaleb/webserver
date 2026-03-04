@@ -7,16 +7,23 @@
 #include "core/EventLoop.hpp"
 #include "core/ConnectionType.hpp"
 #include "core/Connection.hpp"
+#include "utils/Constants.hpp"
 
-EventLoop::EventLoop()
+EventLoop::EventLoop() : running(true)
 {
   epollFd = epoll_create1(0);
   if (epollFd == -1)
   {
     throw EpollCreationException();
   }
-  events = new epoll_event[1024];
+  events = new epoll_event[Constants::Network::EpollMaxEvents];
 }
+
+void EventLoop::stop()
+{
+  running = false;
+}
+
 void EventLoop::addConnection(Connection *connection)
 {
   if (connections.find(connection->getFd()) != connections.end())
@@ -44,9 +51,9 @@ void EventLoop::removeConnection(Connection *connection)
 
 void EventLoop::run()
 {
-  while (true)
+  while (running)
   {
-    int nfds = epoll_wait(epollFd, events, 1024, 1000);
+    int nfds = epoll_wait(epollFd, events, Constants::Network::EpollMaxEvents, Constants::Network::EpollWaitTimeout);
     if (nfds == -1)
     {
       if (errno == EINTR)
@@ -91,15 +98,27 @@ void EventLoop::run()
             }
             if (connection->getRequest().getState() == PARSE_SUCCESS)
             {
-              connection->getRequest().print();
-              // For now, send a response and close
-              events[i].events = EPOLLOUT;
-              write(connection->getFd(), "HTTP/1.1 200 OK\r\nContent-Length: 13\r\n\r\nHello world!\n", 52);
+              struct epoll_event ev;
+              ev.events = EPOLLOUT;
+              ev.data.ptr = (void *)connection;
+              epoll_ctl(epollFd, EPOLL_CTL_MOD, connection->getFd(), &ev);
             }
           }
           else if (events[i].events & EPOLLOUT)
           {
             connection->writeData();
+            if (connection->getShouldCleanup())
+            {
+              removeConnection(connection);
+              continue;
+            }
+            if (connection->getResponse().getState() == RESPONSE_IDLE)
+            {
+              struct epoll_event ev;
+              ev.events = EPOLLIN;
+              ev.data.ptr = (void *)connection;
+              epoll_ctl(epollFd, EPOLL_CTL_MOD, connection->getFd(), &ev);
+            }
           }
         }
         catch (const Connection::ConnectionClosedException &e)

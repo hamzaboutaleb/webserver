@@ -2,6 +2,7 @@
 #include "core/Server.hpp"
 #include "core/Location.hpp"
 #include "core/HttpRequest.hpp"
+#include "utils/Constants.hpp"
 
 RequestContext::RequestContext(const Server *server, const Location *location, const HttpRequest *request)
     : server(server), location(location), request(request)
@@ -43,7 +44,7 @@ size_t RequestContext::getMaxClientBodySize() const
     return location->getMaxClientBodySize();
   if (server)
     return server->getMaxClientBodySize();
-  return 1048576;
+  return Constants::Http::DefaultMaxBodySize;
 }
 
 std::vector<std::string> RequestContext::getMethods() const

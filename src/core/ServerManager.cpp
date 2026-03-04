@@ -59,6 +59,8 @@ void ServerManager::setup(const std::vector<Server *> &servers) {
 
 void ServerManager::run() { eventloop.run(); }
 
+void ServerManager::stop() { eventloop.stop(); }
+
 Server *ServerManager::resolveServerForRequest(const HttpRequest &request,
                                                int port) {
   std::string host = request.getHeader("host");

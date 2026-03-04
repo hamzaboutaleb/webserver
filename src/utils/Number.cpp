@@ -24,3 +24,10 @@ int Number::toInt(const std::string &str, bool *ok)
     *ok = success;
   return success ? num : 0;
 }
+
+std::string Number::toString(long long n)
+{
+  std::stringstream ss;
+  ss << n;
+  return ss.str();
+}

@@ -4,6 +4,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <signal.h>
 
 #include "utils/ErrorReporter.hpp"
 #include "tokenizer/Tokenizer.hpp"
@@ -13,6 +14,18 @@
 #include "config/Transformer.hpp"
 #include "core/ServerManager.hpp"
 #include "core/Socket.hpp"
+
+ServerManager *g_manager = NULL;
+
+void handle_sigint(int sig)
+{
+  (void)sig;
+  if (g_manager)
+  {
+    std::cout << "\nStopping server gracefully..." << std::endl;
+    g_manager->stop();
+  }
+}
 
 std::string readFile(const std::string &filename)
 {
@@ -34,6 +47,8 @@ int main(int argc, char **argv)
     return 1;
   }
 
+  signal(SIGINT, handle_sigint);
+
   std::string filename = argv[1];
   std::string buffer = readFile(filename);
   ErrorReporter errorReporter(buffer, filename);
@@ -44,11 +59,7 @@ int main(int argc, char **argv)
     errorReporter.printAll();
     return 1;
   }
-  // for (size_t i = 0; i < tokens.size(); i++)
-  // {
-  //   const Token &token = tokens[i];
-  //   std::cout << "Token: '" << token.getValue() << "' at line " << token.getSpan().start.line << ", column " << token.getSpan().start.col << std::endl;
-  // }
+  
   Parser parser(tokens, errorReporter);
   Config config = parser.parse();
   if (errorReporter.hasErrors())
@@ -76,6 +87,7 @@ int main(int argc, char **argv)
   }
 
   ServerManager manager;
+  g_manager = &manager;
   try
   {
     manager.setup(servers);
@@ -84,8 +96,10 @@ int main(int argc, char **argv)
   catch (const std::exception &e)
   {
     std::cerr << "Fatal Error: " << e.what() << std::endl;
+    g_manager = NULL;
     return 1;
   }
 
+  g_manager = NULL;
   return 0;
 }

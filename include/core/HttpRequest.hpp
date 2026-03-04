@@ -17,6 +17,7 @@ enum HttpParseState {
 class HttpRequest {
 private:
   HttpParseState state;
+  int errorCode;
   std::string buffer;
   std::string method;
   std::string path;
@@ -38,6 +39,8 @@ public:
   ~HttpRequest();
   HttpParseState getState() const;
   void setState(HttpParseState newState);
+  int getErrorCode() const;
+  void setErrorCode(int code);
   void appendData(const char *data, size_t length);
   void parse();
   void print() const;
@@ -47,6 +50,7 @@ public:
   std::map<std::string, std::string> getHeaders() const { return headers; }
   std::string getHeader(const std::string &name) const;
   std::string getBody() const { return body; }
+  void clear();
   class RequestLineTooLongException : public std::exception {
     const char *what() const throw() { return "Request line too long"; }
   };
